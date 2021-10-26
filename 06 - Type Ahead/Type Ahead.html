@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <!-- <li>Filter for a city</li>
+      <li>or a state</li> -->
+    </ul>
+  </form>
+  <script>
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+    // fetch()方法是XMLHTTPRequest()的替代方案，较之使用更加方便，用于跨网络异步获取资源
+    // 1. 获取数据
+    const cities = [];
+    fetch(endpoint)
+      .then(response => response.json())
+      .then(data => {
+        cities.push(...data);
+        console.log(cities);
+      });
+
+    // 2. 筛选数据
+    function findMatches(searchMetches, cities) {
+      // 将通过筛选后的数据返回
+      return cities.filter(function (data) {
+        // 第二个参数：g代表全局匹配，i代表不区分大小写
+        const regex1 = new RegExp(searchMetches, 'gi');
+        return data.city.match(regex1) || data.state.match(regex1);
+      })
+    }
+
+    // 3. 展示数据
+    function showMatches() {
+      // 调用筛选数据的函数
+      const matchesArray = findMatches(this.value, cities);
+      // 利用map处理数组元素
+      const lis = matchesArray.map(item => {
+        // 第二个参数：g代表全局匹配，i代表不区分大小写
+        const regex2 = new RegExp(this.value, 'gi')
+        // replace()方法可以实现替换字符串操作，用来替换的参数可以是一个字符串或是一个正则表达式
+        const ItemCity = item.city.replace(regex2, `<span class="hl">${this.value}</span>`)
+        const ItemState = item.state.replace(regex2, `<span class="hl">${this.value}</span>`)
+
+        return `
+          <li>
+            <span class="name">${ItemCity}, ${ItemState}</span>  
+            <span class="population">${numberWith(item.population)}</span>  
+          </li>
+        `
+      }).join('')
+
+      suggestions.innerHTML = lis;
+      // 当输入框为空时，弹出消息消失
+      if (!this.value) {
+        suggestions.innerHTML = '';
+      }
+    }
+
+    // 转换数字格式的正则表达式
+    function numberWith(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    }
+
+    // 将数组元素内的li插入ul中
+    // 获取ul
+    const suggestions = document.querySelector(".suggestions");
+
+    // 获取输入框中的值
+    const searchInput = document.querySelector(".search");
+    // 当触发change事件时，调用showMatches函数
+    searchInput.addEventListener("change", showMatches);
+    // 当触发keyup事件时，调用showMatches函数
+    searchInput.addEventListener("keyup", showMatches);
+  </script>
+</body>
+
+</html>

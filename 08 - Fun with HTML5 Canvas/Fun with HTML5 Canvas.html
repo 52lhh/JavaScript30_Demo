@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Canvas</title>
+</head>
+
+<body>
+  <canvas id="draw" width="800" height="800"></canvas>
+
+  <script>
+    // 获取document页面中canvas元素
+    var canvas = document.querySelector("#draw");
+    // 将画布的宽高设置为document屏幕宽高
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // getContext() 方法返回一个用于在画布上绘图的环境，参数2d表示2d绘图
+    const gct = canvas.getContext("2d")
+    console.log(gct);
+    // 当两条线条交汇时，创建圆形边角
+    gct.lineJoin = 'round';
+    // 绘制圆形的结束线帽
+    gct.lineCap = 'round'
+    gct.lineWidth = 20;
+
+    // 设置默认鼠标划线的起点
+    let beginX = 0;
+    let beginY = 0;
+    let hslColor = 0
+
+    // 鼠标移动划线函数
+    function moveLine(e) {
+      gct.strokeStyle = `hsl(${hslColor++}, 100%, 50%)`;
+      // hsl()的第一个参数控制颜色，最大值为359
+      // 当颜色达到最大值时，重置颜色，进行循环
+      if (hslColor >= 359) {
+        hslColor = 0;
+      }
+      // 开始一条路径
+      gct.beginPath();
+      // 路径的开始坐标
+      gct.moveTo(beginX, beginY);
+      // 路径的结束坐标
+      gct.lineTo(e.offsetX, e.offsetY);
+      // 将当前的坐标赋值给移动前一刻的开始坐标
+      [beginX, beginY] = [e.offsetX, e.offsetY];
+      // 绘制路径
+      gct.stroke();
+
+    }
+
+    // 给页面添加鼠标事件
+    // 鼠标在按下的前提下移动才会开始绘图
+    document.addEventListener("mousedown", function (e) {
+      // 当鼠标按下时，获取鼠标当前的位置，并赋值给线的起始点
+      [beginX, beginY] = [e.offsetX, e.offsetY];
+      // 调用绘画函数
+      document.addEventListener("mousemove", moveLine);
+      // 当鼠标弹起时，清除鼠标移动事件
+      document.addEventListener('mouseup', function () {
+        document.removeEventListener("mousemove", moveLine);
+      })
+      // 当鼠标移出document范围时，清除鼠标移动事件
+      document.addEventListener("mouseout", function () {
+        document.removeEventListener("mousemove", moveLine);
+      })
+    })
+  </script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+  </style>
+
+</body>
+
+</html>
